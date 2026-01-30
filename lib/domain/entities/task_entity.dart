@@ -5,8 +5,8 @@ part 'task_entity.freezed.dart';
 
 @freezed
 class TaskEntity with _$TaskEntity {
-  factory TaskEntity({
-    required int id,
+  const factory TaskEntity({
+    required String id,
     required String title,
     String? description,
     required DateTime dueDate,
@@ -14,6 +14,8 @@ class TaskEntity with _$TaskEntity {
     required bool isCompleted,
     required DateTime createdAt,
     String? planId,
+    DateTime? completedAt,
+    @Default([]) List<String> tags,
   }) = _TaskEntity;
 }
 
