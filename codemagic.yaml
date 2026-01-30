@@ -1,0 +1,29 @@
+workflows:
+  myday-ai-android:
+    name: MyDay AI Android
+    max_build_duration: 120
+    environment:
+      groups:
+        - google_services # For API keys if needed
+      vars:
+        BUNDLE_ID: "com.example.mydayai"
+        APP_NAME: "MyDay AI"
+      flutter: "stable"
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up key.properties for Android
+        script: |
+          echo $KEY_PROPERTIES | base64 --decode > "$CM_BUILD_DIR/android/key.properties"
+      - name: Get Flutter packages
+        script: |
+          flutter packages pub get
+      - name: Build Android APK
+        script: |
+          flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
