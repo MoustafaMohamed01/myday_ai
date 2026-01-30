@@ -1,23 +1,36 @@
+// lib/services/database/database_service.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar/isar.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:myday_ai/data/models/task_model.dart';
 import 'package:myday_ai/data/models/event_model.dart';
 import 'package:myday_ai/data/models/plan_model.dart';
 
 class DatabaseService {
-  static Isar? _isar;
+  static const String tasksBox = 'tasks';
+  static const String eventsBox = 'events';
+  static const String plansBox = 'plans';
 
-  Future<Isar> get isar async {
-    if (_isar != null) return _isar!;
+  Future<void> init() async {
+    final appDir = await getApplicationDocumentsDirectory();
+    Hive.init(appDir.path);
     
-    final dir = await getApplicationDocumentsDirectory();
-    _isar = await Isar.open(
-      [TaskModelSchema, EventModelSchema, PlanModelSchema],
-      directory: dir.path,
-    );
-    return _isar!;
+    // Register adapters
+    Hive.registerAdapter(TaskModelAdapter());
+    Hive.registerAdapter(TaskPriorityAdapter());
+    Hive.registerAdapter(EventModelAdapter());
+    Hive.registerAdapter(PlanModelAdapter());
+    
+    // Open boxes
+    await Hive.openBox<TaskModel>(tasksBox);
+    await Hive.openBox<EventModel>(eventsBox);
+    await Hive.openBox<PlanModel>(plansBox);
   }
+
+  Box<TaskModel> get tasksBoxInstance => Hive.box<TaskModel>(tasksBox);
+  Box<EventModel> get eventsBoxInstance => Hive.box<EventModel>(eventsBox);
+  Box<PlanModel> get plansBoxInstance => Hive.box<PlanModel>(plansBox);
 }
 
 final databaseServiceProvider = Provider<DatabaseService>((ref) {
